@@ -72,13 +72,13 @@ func ocr(w http.ResponseWriter, r *http.Request) {
 
         log.Println("stdout:", logout)
         log.Println("stderr:", logerr)
-
+/*
         if len(logerr)>0 {
             log.Println("识别失败：", tmp, logerr)
             res(w, 4, "识别失败", "")
             return
         }
-
+*/
 
 
 
