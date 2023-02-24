@@ -49,7 +49,7 @@ case "$1" in
 			echo "启动中..."
 			build
 			if [ $? -ne 0 ];then
-				nohup ./$PROGRAM >> run.log 2>&1 &
+				nohup ./$PROGRAM >> ocr.log 2>&1 &
 				sleep 2
 				PID=$(pid)
 				if [ $PID -gt 0 ];then
