@@ -48,7 +48,7 @@ func ocr(w http.ResponseWriter, r *http.Request) {
         //文件识别==================================
         var timeout int = 30
         var stdout , stderr bytes.Buffer
-        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+" -l chi_sim")
+        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+"")
         //command := exec.Command("/bin/bash", "-c", "sleep 10")
         command.Stdout = &stdout
         command.Stderr = &stderr
