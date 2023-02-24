@@ -16,7 +16,15 @@ import (
     "encoding/json"
 )
 
-func ocr(w http.ResponseWriter, r *http.Request) {
+func english(w http.ResponseWriter, r *http.Request) {
+    ocr(w, r, "")
+}
+
+func chinese(w http.ResponseWriter, r *http.Request) {
+    ocr(w, r, "-l chi_sim")
+}
+
+func ocr(w http.ResponseWriter, r *http.Request, lang string) {
     contentType := r.Header.Get("Content-Type")
 
     if len(contentType)>=19 && contentType[0:19]=="multipart/form-data" {
@@ -48,7 +56,7 @@ func ocr(w http.ResponseWriter, r *http.Request) {
         //文件识别==================================
         var timeout int = 30
         var stdout , stderr bytes.Buffer
-        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+"")
+        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+" "+lang)
         //command := exec.Command("/bin/bash", "-c", "sleep 10")
         command.Stdout = &stdout
         command.Stderr = &stderr
@@ -104,7 +112,8 @@ func ocr(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    http.HandleFunc("/", ocr)
+    http.HandleFunc("/en", english)
+    http.HandleFunc("/cn", chinese)
     http.HandleFunc("/ping", ping)
     err := http.ListenAndServe(":9090", nil)
     if err != nil {
