@@ -1,8 +1,9 @@
 
-### 环境要求：centos 7
+### 环境要求
+centos 7
 
 ### 安装步骤
-
+#
 #### 1、依赖安装
 ```
 yum install -y gcc gcc-c++ autoconf automake libtool libjpeg libpng libtiff zlib libjpeg-devel libpng-devel libtiff-devel zlib-devel
