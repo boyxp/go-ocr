@@ -1,15 +1,20 @@
+# 基于tesseract4的go文字识别
 
-# 安装tesseract4
+### 安装tesseract4
 
 yum -y install yum-utils
 
 yum-config-manager --add-repo https://download.opensuse.org/repositories/home:/Alexander_Pozdnyakov/CentOS_7/
+
 rpm --import https://build.opensuse.org/projects/home:Alexander_Pozdnyakov/public_key
 
 yum --showduplicates list tesseract
 
 yum install tesseract
 
+tesseract -v
+
+#### 配置中文训练数据
 
 下载中文训练数据
 
