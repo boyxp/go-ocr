@@ -6,6 +6,9 @@ import (
     "fmt"
     "log"
     "time"
+    "bytes"
+    "syscall"
+    "strings"
     "strconv"
     "os/exec"
     "io/ioutil"
@@ -17,6 +20,8 @@ func ocr(w http.ResponseWriter, r *http.Request) {
     contentType := r.Header.Get("Content-Type")
 
     if len(contentType)>=19 && contentType[0:19]=="multipart/form-data" {
+
+        //文件上传==================================
         r.ParseMultipartForm(32 << 20)
         file, _, err := r.FormFile("image")
         if err != nil {
@@ -36,16 +41,56 @@ func ocr(w http.ResponseWriter, r *http.Request) {
 
         log.Println("文件上传："+tmp)
 
-        out, err := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+" -l chi_sim").Output()
-        if err != nil {
-            log.Println("文件识别失败："+tmp+"\t"+err.Error())
-            res(w, 3, err.Error(), string(out))
+
+
+
+
+        //文件识别==================================
+        var timeout int = 30
+        var stdout , stderr bytes.Buffer
+        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+" -l chi_sim")
+        //command := exec.Command("/bin/bash", "-c", "sleep 10")
+        command.Stdout = &stdout
+        command.Stderr = &stderr
+        command.Start()
+        done := make(chan error)
+        go func() { done <- command.Wait() }()
+        after := time.After(time.Duration(timeout) * time.Second)
+        select {
+            case <-after:
+                        command.Process.Signal(syscall.SIGINT)
+                        time.Sleep(time.Second)
+                        command.Process.Kill()
+                        log.Println("识别超时：", tmp)
+                        res(w, 3, "识别超时", "")
+                        return
+            case <-done:
+
+        }
+        logout := trimOutput(stdout)
+        logerr := trimOutput(stderr)
+
+        log.Println("stdout:", logout)
+        log.Println("stderr:", logerr)
+
+        if len(logerr)>0 {
+            log.Println("识别失败：", tmp, logerr)
+            res(w, 4, "识别失败", "")
             return
         }
 
+
+
+
+
+
+
+
+
+        //输出结果==================================
         data, err := ioutil.ReadFile(tmp+".txt")
         if err!=nil {
-            res(w, 4, err.Error(), "")
+            res(w, 5, err.Error(), "")
             return
         }
 
@@ -82,3 +127,6 @@ func ping(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "pong")
 }
 
+func trimOutput(buffer bytes.Buffer) string {
+    return strings.TrimSpace(string(bytes.TrimRight(buffer.Bytes(), "\x00")))
+}
