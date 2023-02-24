@@ -19,11 +19,11 @@ import (
 import "github.com/fvbock/endless"
 
 func english(w http.ResponseWriter, r *http.Request) {
-    ocr(w, r, "--oem 1 -l eng")
+    ocr(w, r, "--oem 1 -l eng quiet")
 }
 
 func chinese(w http.ResponseWriter, r *http.Request) {
-    ocr(w, r, "--oem 1 -l chi_sim")
+    ocr(w, r, "--oem 1 -l chi_sim quiet")
 }
 
 func ocr(w http.ResponseWriter, r *http.Request, param string) {
