@@ -51,14 +51,16 @@ func ocr(w http.ResponseWriter, r *http.Request) {
 
         log.Println("文件识别成功："+tmp)
 
-        res(w, 4, "", string(data))
+        res(w, 0, "", string(data))
     } else {
-        res(w, 1, "请求方式错误：需要用文件上传方式请求", "")
+        w.WriteHeader(http.StatusForbidden)
+        fmt.Fprintf(w, "Forbidden")
     }
 }
 
 func main() {
     http.HandleFunc("/", ocr)
+    http.HandleFunc("/ping", ping)
     err := http.ListenAndServe(":9090", nil)
     if err != nil {
         log.Fatal("ListenAndServe: ", err)
@@ -76,5 +78,7 @@ func res(w http.ResponseWriter, code int, error string, data interface{}) {
     fmt.Fprintf(w, "{\"code\":%d,\"message\":\"%v\",\"response\":%v}", code, error, string(json))
 }
 
-
+func ping(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "pong")
+}
 
