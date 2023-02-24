@@ -16,15 +16,17 @@ import (
     "encoding/json"
 )
 
+import "github.com/fvbock/endless"
+
 func english(w http.ResponseWriter, r *http.Request) {
-    ocr(w, r, "")
+    ocr(w, r, "--oem 1")
 }
 
 func chinese(w http.ResponseWriter, r *http.Request) {
-    ocr(w, r, "-l chi_sim")
+    ocr(w, r, "--oem 1 -l chi_sim")
 }
 
-func ocr(w http.ResponseWriter, r *http.Request, lang string) {
+func ocr(w http.ResponseWriter, r *http.Request, param string) {
     contentType := r.Header.Get("Content-Type")
 
     if len(contentType)>=19 && contentType[0:19]=="multipart/form-data" {
@@ -54,13 +56,14 @@ func ocr(w http.ResponseWriter, r *http.Request, lang string) {
 
 
         //文件识别==================================
-        var timeout int = 30
-        var stdout , stderr bytes.Buffer
-        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+" --oem 1 "+lang)
-        //command := exec.Command("/bin/bash", "-c", "sleep 10")
+        var timeout int = 30 //超时30秒
+        var stdout, stderr bytes.Buffer
+        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+" "+param)
         command.Stdout = &stdout
         command.Stderr = &stderr
         command.Start()
+
+        //监听超时
         done := make(chan error)
         go func() { done <- command.Wait() }()
         after := time.After(time.Duration(timeout) * time.Second)
@@ -75,19 +78,12 @@ func ocr(w http.ResponseWriter, r *http.Request, lang string) {
             case <-done:
 
         }
+
         logout := trimOutput(stdout)
         logerr := trimOutput(stderr)
 
         log.Println("stdout:", logout)
         log.Println("stderr:", logerr)
-/*
-        if len(logerr)>0 {
-            log.Println("识别失败：", tmp, logerr)
-            res(w, 4, "识别失败", "")
-            return
-        }
-*/
-
 
 
 
@@ -115,10 +111,26 @@ func main() {
     http.HandleFunc("/en", english)
     http.HandleFunc("/cn", chinese)
     http.HandleFunc("/ping", ping)
-    err := http.ListenAndServe(":9090", nil)
-    if err != nil {
-        log.Fatal("ListenAndServe: ", err)
+
+    server  := endless.NewServer(":9090", nil)
+    server.BeforeBegin = func(add string) {
+        pid := syscall.Getpid()
+        log.Println("pid:",pid)
+        con := []byte(strconv.Itoa(pid))
+        err := ioutil.WriteFile("pid", con, 0644)
+        if err != nil {
+            log.Fatal(err)
+        }
     }
+
+    err := server.ListenAndServe()
+    if err != nil {
+        log.Println(err)
+    }
+
+    log.Println("Server stopped")
+
+    os.Exit(0)
 }
 
 func res(w http.ResponseWriter, code int, error string, data interface{}) {
