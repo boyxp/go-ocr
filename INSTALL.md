@@ -54,10 +54,10 @@ https://github.com/tesseract-ocr/tessdata_fast
 文件夹
 
 6、测试识别效果
-找个带字图片test.png
-tesseract test.png result -l chi_sim
+找个带字图片input.png
+tesseract input.png output -l chi_sim --oem 1
 
-结果输出到result.txt
+结果输出到output.txt
 
 参考原文：https://www.jianshu.com/p/edfabeaf6ba8
 
