@@ -1,28 +1,30 @@
-# 基于tesseract4的go文字识别
+# 基于 tesseract 5的go文字识别服务
 
-### 安装tesseract4
+环境要求：Centos 7
 
-yum -y install yum-utils
+## 安装
+[安装 tesseract 5](INSTALL.md)
 
-yum-config-manager --add-repo https://download.opensuse.org/repositories/home:/Alexander_Pozdnyakov/CentOS_7/
+## 启动
+```
+sh manage.sh start
+```
 
-rpm --import https://build.opensuse.org/projects/home:Alexander_Pozdnyakov/public_key
+## 测试
+```
+curl 127.0.0.1:9090/cn -F "image=@test.png"
+```
 
-yum --showduplicates list tesseract
+## 使用
+可以解析域名，以POST方式发送image图片文件，得到返回的json结果如下
 
-yum install tesseract
+```
+{
+    "code": 0,
+    "message": "",
+    "response": "哈喽"
+}
+```
+code=0为成功，其他为失败
 
-tesseract -v
-
-#### 配置中文训练数据
-
-下载中文训练数据
-
-https://github.com/tesseract-ocr/tessdata
-
-chi_sim.traineddata
-
-chi_sim_vert.traineddata
-
-放到 /usr/share/tesseract/4/tessdata/
 
