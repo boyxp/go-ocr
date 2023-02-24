@@ -19,7 +19,7 @@ import (
 import "github.com/fvbock/endless"
 
 func english(w http.ResponseWriter, r *http.Request) {
-    ocr(w, r, "--oem 1")
+    ocr(w, r, "--oem 1 -l eng")
 }
 
 func chinese(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +58,7 @@ func ocr(w http.ResponseWriter, r *http.Request, param string) {
         //文件识别==================================
         var timeout int = 30 //超时30秒
         var stdout, stderr bytes.Buffer
-        command := exec.Command("/bin/bash", "-c", "/usr/bin/tesseract "+tmp+" "+tmp+" "+param)
+        command := exec.Command("/bin/bash", "-c", "/usr/local/bin/tesseract "+tmp+" "+tmp+" "+param)
         command.Stdout = &stdout
         command.Stderr = &stderr
         command.Start()
