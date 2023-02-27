@@ -17,6 +17,12 @@ import (
 )
 
 import "github.com/fvbock/endless"
+import "github.com/joho/godotenv"
+
+func init() {
+    log.Println("init...")
+    godotenv.Overload()
+}
 
 func english(w http.ResponseWriter, r *http.Request) {
     ocr(w, r, "--oem 1 -l eng quiet")
@@ -56,7 +62,15 @@ func ocr(w http.ResponseWriter, r *http.Request, param string) {
 
 
         //文件识别==================================
-        var timeout int = 30 //超时30秒
+        var timeout int = 10 //超时
+        if os.Getenv("timeout")!="" {
+            set, err := strconv.Atoi(os.Getenv("timeout"))
+            if err==nil {
+                timeout=set
+            }
+        }
+
+
         var stdout, stderr bytes.Buffer
         command := exec.Command("/bin/bash", "-c", "/usr/local/bin/tesseract "+tmp+" "+tmp+" "+param)
         command.Stdout = &stdout
